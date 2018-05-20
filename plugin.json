@@ -1,0 +1,28 @@
+{
+  "type": "datasource",
+  "name": "Elasticsearch Timeless",
+  "id": "elasticsearch-timeless",
+
+  "info": {
+    "description": "Elasticsearch Timeless Data Source for Grafana",
+    "author": {
+      "name": "Guido Navalesi",
+      "url": "https://github.com/gnavalesi"
+    },
+    "keywords": ["elasticsearch"],
+    "logos": {
+      "small": "img/elasticsearch.svg",
+      "large": "img/elasticsearch.svg"
+    },
+    "links": [
+      {"name": "elastic.co", "url": "https://www.elastic.co/products/elasticsearch"}
+    ],
+    "version": "5.0.0"
+  },
+
+  "annotations": true,
+  "metrics": true,
+  "queryOptions": {
+    "minInterval": false
+  }
+}
