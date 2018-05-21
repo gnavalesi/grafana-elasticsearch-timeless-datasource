@@ -57,6 +57,7 @@ export class ElasticBucketAggCtrl {
       $scope.showOptions = false;
 
       switch ($scope.agg.type) {
+        case 'date_histogram':
         case 'histogram':
         case 'terms': {
           delete $scope.agg.query;
@@ -125,6 +126,25 @@ export class ElasticBucketAggCtrl {
           settingsLinkText = 'Filter Queries (' + settings.filters.length + ')';
           break;
         }
+        case 'date_histogram': {
+          settings.interval = settings.interval || 'auto';
+          settings.min_doc_count = settings.min_doc_count || 0;
+          $scope.agg.field = $scope.target.timeField;
+          settingsLinkText = 'Interval: ' + settings.interval;
+
+          if (settings.min_doc_count > 0) {
+            settingsLinkText += ', Min Doc Count: ' + settings.min_doc_count;
+          }
+
+          if (settings.trimEdges === undefined || settings.trimEdges < 0) {
+            settings.trimEdges = 0;
+          }
+
+          if (settings.trimEdges && settings.trimEdges > 0) {
+            settingsLinkText += ', Trim edges: ' + settings.trimEdges;
+          }
+          break;
+        }
         case 'histogram': {
           settings.interval = settings.interval || 1000;
           settings.min_doc_count = _.defaultTo(settings.min_doc_count, 1);
@@ -165,7 +185,11 @@ export class ElasticBucketAggCtrl {
     };
 
     $scope.getFieldsInternal = function() {
-      return $scope.getFields();
+      if ($scope.agg.type === 'date_histogram') {
+        return $scope.getFields({ $fieldType: 'date' });
+      } else {
+        return $scope.getFields();
+      }
     };
 
     $scope.getIntervalOptions = function() {
@@ -176,6 +200,10 @@ export class ElasticBucketAggCtrl {
       // if last is date histogram add it before
       var lastBucket = bucketAggs[bucketAggs.length - 1];
       var addIndex = bucketAggs.length - 1;
+
+      if (lastBucket && lastBucket.type === 'date_histogram') {
+        addIndex -= 1;
+      }
 
       var id = _.reduce(
         $scope.target.bucketAggs.concat($scope.target.metrics),
