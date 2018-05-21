@@ -2,7 +2,6 @@
   "type": "datasource",
   "name": "Elasticsearch Timeless",
   "id": "elasticsearch-timeless",
-
   "info": {
     "description": "Elasticsearch Timeless Data Source for Grafana",
     "author": {
