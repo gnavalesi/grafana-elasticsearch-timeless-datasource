@@ -1,23 +1,10 @@
 import * as queryDef from './query_def';
 
 export class ElasticQueryBuilder {
-  timeField: string;
   esVersion: number;
 
   constructor(options) {
-    this.timeField = options.timeField;
     this.esVersion = options.esVersion;
-  }
-
-  getRangeFilter() {
-    var filter = {};
-    filter[this.timeField] = {
-      gte: '$timeFrom',
-      lte: '$timeTo',
-      format: 'epoch_millis',
-    };
-
-    return filter;
   }
 
   buildTermsAgg(aggDef, queryNode, target) {
@@ -59,26 +46,6 @@ export class ElasticQueryBuilder {
     return queryNode;
   }
 
-  getDateHistogramAgg(aggDef) {
-    var esAgg: any = {};
-    var settings = aggDef.settings || {};
-    esAgg.interval = settings.interval;
-    esAgg.field = this.timeField;
-    esAgg.min_doc_count = settings.min_doc_count || 0;
-    esAgg.extended_bounds = { min: '$timeFrom', max: '$timeTo' };
-    esAgg.format = 'epoch_millis';
-
-    if (esAgg.interval === 'auto') {
-      esAgg.interval = '$__interval';
-    }
-
-    if (settings.missing) {
-      esAgg.missing = settings.missing;
-    }
-
-    return esAgg;
-  }
-
   getHistogramAgg(aggDef) {
     var esAgg: any = {};
     var settings = aggDef.settings || {};
@@ -111,8 +78,6 @@ export class ElasticQueryBuilder {
 
   documentQuery(query, size) {
     query.size = size;
-    query.sort = {};
-    query.sort[this.timeField] = { order: 'desc', unmapped_type: 'boolean' };
 
     // fields field not supported on ES 5.x
     if (this.esVersion < 5) {
@@ -120,11 +85,6 @@ export class ElasticQueryBuilder {
     }
 
     query.script_fields = {};
-    if (this.esVersion < 5) {
-      query.fielddata_fields = [this.timeField];
-    } else {
-      query.docvalue_fields = [this.timeField];
-    }
     return query;
   }
 
@@ -178,8 +138,7 @@ export class ElasticQueryBuilder {
   build(target, adhocFilters?, queryString?) {
     // make sure query has defaults;
     target.metrics = target.metrics || [{ type: 'count', id: '1' }];
-    target.bucketAggs = target.bucketAggs || [{ type: 'date_histogram', id: '2', settings: { interval: 'auto' } }];
-    target.timeField = this.timeField;
+    target.bucketAggs = target.bucketAggs;
 
     var i, nestedAggs, metric;
     var query = {
@@ -187,7 +146,6 @@ export class ElasticQueryBuilder {
       query: {
         bool: {
           filter: [
-            { range: this.getRangeFilter() },
             {
               query_string: {
                 analyze_wildcard: true,
@@ -219,10 +177,6 @@ export class ElasticQueryBuilder {
       var esAgg = {};
 
       switch (aggDef.type) {
-        case 'date_histogram': {
-          esAgg['date_histogram'] = this.getDateHistogramAgg(aggDef);
-          break;
-        }
         case 'histogram': {
           esAgg['histogram'] = this.getHistogramAgg(aggDef);
           break;
@@ -286,11 +240,7 @@ export class ElasticQueryBuilder {
   getTermsQuery(queryDef) {
     var query: any = {
       size: 0,
-      query: {
-        bool: {
-          filter: [{ range: this.getRangeFilter() }],
-        },
-      },
+      query: {},
     };
 
     if (queryDef.query) {
