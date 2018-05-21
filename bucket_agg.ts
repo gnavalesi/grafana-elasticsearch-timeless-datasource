@@ -4,7 +4,7 @@ import * as queryDef from './query_def';
 
 export function elasticBucketAgg() {
   return {
-    templateUrl: 'public/app/plugins/datasource/elasticsearch/partials/bucket_agg.html',
+    templateUrl: 'public/app/plugins/datasource/elasticsearch-timeless/partials/bucket_agg.html',
     controller: 'ElasticBucketAggCtrl',
     restrict: 'E',
     scope: {

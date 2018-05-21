@@ -1,7 +1,7 @@
 import _ from 'lodash';
 
 export class ElasticConfigCtrl {
-  static templateUrl = 'public/app/plugins/datasource/elasticsearch/partials/config.html';
+  static templateUrl = 'public/app/plugins/datasource/elasticsearch-timeless/partials/config.html';
   current: any;
 
   /** @ngInject */

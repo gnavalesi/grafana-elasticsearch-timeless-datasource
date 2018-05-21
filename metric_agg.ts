@@ -4,7 +4,7 @@ import * as queryDef from './query_def';
 
 export function elasticMetricAgg() {
   return {
-    templateUrl: 'public/app/plugins/datasource/elasticsearch/partials/metric_agg.html',
+    templateUrl: 'public/app/plugins/datasource/elasticsearch-timeless/partials/metric_agg.html',
     controller: 'ElasticMetricAggCtrl',
     restrict: 'E',
     scope: {
